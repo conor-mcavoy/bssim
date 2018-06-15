@@ -46,7 +46,7 @@ class Computer:
         """Respond to a shot from the player."""
         
         self.shots_taken.add(square)
-        self.defeated = self.occupied <= self.shots_taken:
+        self.defeated = self.occupied <= self.shots_taken
         return self.grid.query(square)
 
     def prep_simulation(self):

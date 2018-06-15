@@ -34,4 +34,4 @@ class Grid:
         return all_squares
 
     def query(self, square):
-        return square in self.occupied_squares():
+        return square in self.occupied_squares()
