@@ -21,7 +21,7 @@ Any other configuration won't work.
 Once the game is running, the layout should be intuitive. Good luck, it's not easy to beat the computer!
 
 ## Monte Carlo method
-The algorithm used is relatively straightforward. The computer records all of its past hits and misses. Each turn, it uses that information to generate a list of all possible locations for each enemy ship. Then it makes random selections among these possibilites and records the valid configurations, compiling the data into a frequency chart. After 100 iterations, the square most often occupied in these simulations is choosen as the next shot.
+The algorithm used is relatively straightforward. The computer records all of its past hits and misses. Each turn, it uses that information to generate a list of all possible locations for each enemy ship. Then it makes random selections among these possibilities and records the valid configurations, compiling the data into a frequency chart. After 100 iterations, the square most often occupied in these simulations is chosen as the next shot.
 
 ## Future
 There will soon be a way to place your ships in-game, without relying on a complicated format in a text file. I also want to add the option to view a heat-map diagram of the square frequency chart mentioned above, which would allow the player to see their own board as the computer imagines it to be laid out.
