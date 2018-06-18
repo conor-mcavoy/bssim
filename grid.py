@@ -1,4 +1,3 @@
-# this class is probably irrelevant and can be removed eventually
 class Grid:
     def __init__(self):
         self.ships = set()
@@ -26,6 +25,10 @@ class Grid:
         occupied = self.occupied_squares()
         if occupied.intersection(ship.squares) == set():
             self.ships.add(ship)
+            return True
+        else:
+            return False
+        
 
     def occupied_squares(self):
         all_squares = set()

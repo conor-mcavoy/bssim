@@ -1,12 +1,14 @@
 import argparse
+import random
+import sys
+import time
+
+import pygame
+
 import comp
 import grid
 import player
-import pygame
-import random
 import ship
-import sys
-import time
 
 
 def main():
@@ -26,6 +28,8 @@ def main():
     pygame.init()
     pygame.font.init()
     pygame.display.set_caption('Battleship')
+    icon = pygame.image.load('images/icon.bmp')
+    pygame.display.set_icon(icon)
     
     screen = pygame.display.set_mode((880, 480))
     screen.fill(white)
@@ -67,7 +71,7 @@ def main():
         pygame.display.flip()
 
         if need_to_wait:
-            time.sleep(1)
+            #time.sleep(1)
             need_to_wait = False
 
         if players_turn:

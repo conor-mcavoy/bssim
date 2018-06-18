@@ -46,33 +46,98 @@ class Computer:
         """Respond to a shot from the player."""
         
         self.shots_taken.add(square)
-        self.defeated = self.occupied <= self.shots_taken
+        self.defeated = (self.occupied <= self.shots_taken)
         return self.grid.query(square)
-
+    
     def prep_simulation(self):
-        sizes = [5, 4, 3, 3, 2]
+        """Prepare to do simulations by generating a dictionary of possible locations for each ship size."""
+        
+        sizes = [5, 4, 3, 2]
         alphabet = 'ABCDEFGHIJ'
         numbers = map(str, range(1, 11))
         full_grid = [(col, row) for row in numbers for col in alphabet]
+        possibilities = {5: [], 4: [], 3: [], 2: []}
         for size in sizes:
             for starting_square in full_grid:
+                col_num = alphabet.index(starting_square[0])
+                row_num = int(starting_square[1])
                 # right
-                for i in range(size):
-                    pass
+                if col_num + size <= 10:
+                    for i in range(size):
+                        current_square = (alphabet[col_num+i],
+                                          starting_square[1])
+                        if current_square in self.shots_missed:
+                            # in the future, squares that cause a break
+                            # can be cached for speed improvement
+                            break
+                    else: # only reached if all squares are valid
+                        possibilities[size].append((starting_square, 'right'))
                 # down
-            break
-        
+                if row_num + size <= 11:
+                    for i in range(size):
+                        current_square = (starting_square[0],
+                                          str(row_num+i))
+                        if current_square in self.shots_missed:
+                            break
+                    else: # only reached if all squares are valid
+                        possibilities[size].append((starting_square, 'down'))
+        return possibilities
+
+    def simulate_player(self, possibilities):
+        ship_sizes = [5, 4, 3, 3, 2]
+        random.shuffle(ship_sizes)
+        temp_grid = grid.Grid()
+        for size in ship_sizes:
+            possible_locations = list(possibilities[size])
+            random.shuffle(possible_locations)
+            ship_added = False
+            for location in possible_locations:
+                square, direction = location
+                col, row = square
+                ship_str = ' '.join([str(size), col, row, direction])
+                new_ship = ship.Ship(ship_str)
+                    
+                if temp_grid.add_ship(new_ship):
+                    ship_added = True
+                    break
+            if not ship_added: # ran out of locations
+                return []
+        if self.shots_hit <= temp_grid.occupied_squares():
+            return list(temp_grid.occupied_squares())
+        return []
+
+    def accumulate_simulations(self):
+        square_frequency = {}
+        possibilities = self.prep_simulation()
+        successful_sims = 0
+        while successful_sims < 100:
+            square_data = self.simulate_player(possibilities)
+            if not square_data:
+                continue
+            successful_sims += 1
+            for square in square_data:
+                if square in square_frequency:
+                    square_frequency[square] += 1
+                else:
+                    square_frequency[square] = 1
+        return square_frequency
+                    
     
     def make_shot(self):
         """Generate a shot to send to player."""
         
-        alphabet = 'ABCDEFGHIJ'
-        numbers = map(str, range(1, 11))
-        full_grid = set((col, row) for row in numbers for col in alphabet)
-        possibilities = list(full_grid - self.shots_sent)
-        shot = random.choice(possibilities)
-        self.shots_sent.add(shot)
-        return shot
+        #alphabet = 'ABCDEFGHIJ'
+        #numbers = map(str, range(1, 11))
+        #full_grid = set((col, row) for row in numbers for col in alphabet)
+        #possibilities = list(full_grid - self.shots_sent)
+        #shot = random.choice(possibilities)
+        square_tuples = sorted(self.accumulate_simulations().items(),
+                             key=lambda x: x[1], reverse=True)
+        for square_tuple in square_tuples:
+            square, freq = square_tuple
+            if square not in self.shots_sent:
+                self.shots_sent.add(square)
+                return square
 
     def register_shot(self, shot, hit):
         """Register and record a hit or miss response from player."""

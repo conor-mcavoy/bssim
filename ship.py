@@ -5,7 +5,8 @@ class Ship:
         alphabet = 'ABCDEFGHIJ'
         column_num = alphabet.index(column)
         row_num = int(row)
-        if column_num + self.size > 10 or row_num + self.size > 11:
+        if column_num + self.size > 10 and direction == 'right'\
+           or row_num + self.size > 11 and direction == 'down':
             raise IndexError
         
         self.squares = set()
