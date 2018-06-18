@@ -1,3 +1,5 @@
+import copy
+
 import grid
 import random
 import ship
@@ -83,16 +85,26 @@ class Computer:
                         possibilities[size].append((starting_square, 'down'))
         return possibilities
 
-    def simulate_player(self, possibilities):
+    def simulate_player(self, possibilities, sunk_ships):
+        sunk_ships_copy = copy.deepcopy(sunk_ships)
         ship_sizes = [5, 4, 3, 3, 2]
         random.shuffle(ship_sizes)
         temp_grid = grid.Grid()
         for size in ship_sizes:
-            possible_locations = list(possibilities[size])
-            random.shuffle(possible_locations)
+            if size in sunk_ships_copy:
+                possible_locations = [sunk_ships_copy[size]]
+                sunk_ships_copy.pop(size)
+            else:
+                possible_locations = list(possibilities[size])
+                random.shuffle(possible_locations)
             ship_added = False
             for location in possible_locations:
                 square, direction = location
+                #if len(square) != 2:
+                #    print(square)
+                #    print(direction)
+                #    print(location)
+                #    print(possible_locations)
                 col, row = square
                 ship_str = ' '.join([str(size), col, row, direction])
                 new_ship = ship.Ship(ship_str)
@@ -106,12 +118,12 @@ class Computer:
             return list(temp_grid.occupied_squares())
         return []
 
-    def accumulate_simulations(self):
+    def accumulate_simulations(self, sunk_ships):
         square_frequency = {}
         possibilities = self.prep_simulation()
         successful_sims = 0
         while successful_sims < 100:
-            square_data = self.simulate_player(possibilities)
+            square_data = self.simulate_player(possibilities, sunk_ships)
             if not square_data:
                 continue
             successful_sims += 1
@@ -123,7 +135,7 @@ class Computer:
         return square_frequency
                     
     
-    def make_shot(self):
+    def make_shot(self, sunk_ships):
         """Generate a shot to send to player."""
         
         #alphabet = 'ABCDEFGHIJ'
@@ -131,7 +143,8 @@ class Computer:
         #full_grid = set((col, row) for row in numbers for col in alphabet)
         #possibilities = list(full_grid - self.shots_sent)
         #shot = random.choice(possibilities)
-        square_tuples = sorted(self.accumulate_simulations().items(),
+        #print(sunk_ships)
+        square_tuples = sorted(self.accumulate_simulations(sunk_ships).items(),
                              key=lambda x: x[1], reverse=True)
         for square_tuple in square_tuples:
             square, freq = square_tuple

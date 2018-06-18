@@ -2,6 +2,8 @@ class Ship:
     def __init__(self, ship_str):
         size, column, row, direction = ship_str.split()
         self.size = int(size)
+        self.square = (column, row)
+        self.direction = direction
         alphabet = 'ABCDEFGHIJ'
         column_num = alphabet.index(column)
         row_num = int(row)

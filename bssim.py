@@ -84,7 +84,7 @@ def main():
                 pygame.mouse.set_cursor(*pygame.cursors.arrow)
         else:
             pygame.mouse.set_cursor(*pygame.cursors.arrow)
-            computer_shot = computer.make_shot()
+            computer_shot = computer.make_shot(p.ships_sunk())
             player_response = p.query(computer_shot)
             computer.register_shot(computer_shot, player_response)
             players_turn = True

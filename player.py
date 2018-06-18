@@ -15,6 +15,7 @@ class Player:
         self.occupied.update(self.grid.occupied_squares())
 
     def query(self, square):
+        self.ships_sunk()
         self.shots_taken.add(square)
         if self.occupied <= self.shots_taken:
             self.defeated = True
@@ -22,6 +23,13 @@ class Player:
             return
         return self.grid.query(square)
 
+    def ships_sunk(self):
+        sunk = {}
+        for s in self.grid.ships:
+            if s.squares <= self.shots_taken:
+                sunk[s.size] = (s.square, s.direction)
+        return sunk
+    
     def show(self, game):
         font = game.font.SysFont(game.font.get_default_font(), 22)
         alphabet = 'ABCDEFGHIJ'
