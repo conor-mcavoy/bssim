@@ -138,12 +138,6 @@ class Computer:
     def make_shot(self, sunk_ships):
         """Generate a shot to send to player."""
         
-        #alphabet = 'ABCDEFGHIJ'
-        #numbers = map(str, range(1, 11))
-        #full_grid = set((col, row) for row in numbers for col in alphabet)
-        #possibilities = list(full_grid - self.shots_sent)
-        #shot = random.choice(possibilities)
-        #print(sunk_ships)
         square_tuples = sorted(self.accumulate_simulations(sunk_ships).items(),
                              key=lambda x: x[1], reverse=True)
         for square_tuple in square_tuples:

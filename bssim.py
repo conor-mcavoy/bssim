@@ -39,7 +39,6 @@ def main():
     font = pygame.font.SysFont(pygame.font.get_default_font(), 22)
     message = font.render('Your turn.', True, black)
     
-    alphabet = 'ABCDEFGHIJ'
     players_turn = True
     need_to_wait = False
 
@@ -71,7 +70,7 @@ def main():
         pygame.display.flip()
 
         if need_to_wait:
-            #time.sleep(1)
+            time.sleep(0.8)
             need_to_wait = False
 
         if players_turn:
