@@ -17,22 +17,21 @@ class Computer:
         
         self.defeated = False
 
-    def __str__(self):
-        return str(self.grid)
-
     def generate_ships(self):
+        """Initialize ship positions randomly."""
+        
         alphabet = 'ABCDEFGHIJ'
         numbers = map(str, range(1, 11))
         full_grid = [(col, row) for row in numbers for col in alphabet]
         sizes = [5, 4, 3, 3, 2]
         for size in sizes:
             occupied = self.grid.occupied_squares()
+            # this is inefficient but it's so fast it doesn't matter
+            ship_size = str(size)
             while True:
-                ship_list = [str(size)]
-                location = random.choice(full_grid)
-                ship_list.extend(location)
-                ship_list.append(random.choice(('right', 'down')))
-                ship_str = ' '.join(ship_list)
+                col, row = random.choice(full_grid)
+                direction = random.choice(['right', 'down'])
+                ship_str = ' '.join(ship_size, col, row, direction)
                 try:
                     s = ship.Ship(ship_str)
                 except IndexError:
@@ -63,7 +62,6 @@ class Computer:
             for starting_square in full_grid:
                 col_num = alphabet.index(starting_square[0])
                 row_num = int(starting_square[1])
-                # right
                 if col_num + size <= 10:
                     for i in range(size):
                         current_square = (alphabet[col_num+i],
@@ -72,16 +70,15 @@ class Computer:
                             # in the future, squares that cause a break
                             # can be cached for speed improvement
                             break
-                    else: # only reached if all squares are valid
+                    else:
                         possibilities[size].append((starting_square, 'right'))
-                # down
                 if row_num + size <= 11:
                     for i in range(size):
                         current_square = (starting_square[0],
                                           str(row_num+i))
                         if current_square in self.shots_missed:
                             break
-                    else: # only reached if all squares are valid
+                    else:
                         possibilities[size].append((starting_square, 'down'))
         return possibilities
 
@@ -100,11 +97,6 @@ class Computer:
             ship_added = False
             for location in possible_locations:
                 square, direction = location
-                #if len(square) != 2:
-                #    print(square)
-                #    print(direction)
-                #    print(location)
-                #    print(possible_locations)
                 col, row = square
                 ship_str = ' '.join([str(size), col, row, direction])
                 new_ship = ship.Ship(ship_str)
