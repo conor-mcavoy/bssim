@@ -10,6 +10,13 @@ import grid
 import player
 import ship
 
+# TODO soon
+# show and tell the player when they sink a ship
+# show and tell the player when one of their ships is sunk
+
+# TODO later
+# interactive ship placement
+# add heatmap option
 
 def main():
     parser = argparse.ArgumentParser()
@@ -41,6 +48,7 @@ def main():
     
     players_turn = True
     need_to_wait = False
+    computer_message = ''
 
     while True:
         clock.tick(60)
@@ -52,14 +60,16 @@ def main():
                 mouse_pos = pygame.mouse.get_pos()
                 computer_grid = computer.grid_rect(pygame)
                 if computer_grid.collidepoint(mouse_pos):
-                    players_turn = False
                     square = computer.pos_to_square(mouse_pos)
-                    response = computer.query(square)
-                    if response:
-                        message_text = "Hit! Computer's turn."
-                    else:
-                        message_text = "Miss! Computer's turn."
-                    message = font.render(message_text, True, black)        
+                    if square not in computer.shots_taken:
+                        players_turn = False
+                        response = computer.query(square)
+                        computer_message = ''
+                        if response:
+                            message_text = "Hit at {}{}! Computer's turn.".format(square[0], square[1])
+                        else:
+                            message_text = "Miss at {}{}! Computer's turn.".format(square[0], square[1])
+                        message = font.render(message_text, True, black)        
 
         screen.fill((255, 255, 255))
 
@@ -74,17 +84,26 @@ def main():
             need_to_wait = False
 
         if players_turn:
-            message = font.render('Your turn.', True, black)
+            message = font.render(computer_message + 'Your turn.', True, black)
             mouse_pos = pygame.mouse.get_pos()
             computer_grid = pygame.Rect(460, 40, 400, 400)
             if computer_grid.collidepoint(mouse_pos):
-                pygame.mouse.set_cursor(*pygame.cursors.diamond)
+                square = computer.pos_to_square(mouse_pos)
+                if square not in computer.shots_taken:
+                    pygame.mouse.set_cursor(*pygame.cursors.diamond)
+                else:
+                    pygame.mouse.set_cursor(*pygame.cursors.arrow)
             else:
                 pygame.mouse.set_cursor(*pygame.cursors.arrow)
         else:
             pygame.mouse.set_cursor(*pygame.cursors.arrow)
             computer_shot = computer.make_shot(p.ships_sunk())
             player_response = p.query(computer_shot)
+            computer_message = 'Computer fired at {}{}: '.format(computer_shot[0], computer_shot[1])
+            if player_response:
+                computer_message += 'hit! '
+            else:
+                computer_message += 'miss! '    
             computer.register_shot(computer_shot, player_response)
             players_turn = True
             need_to_wait = True
