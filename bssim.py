@@ -80,8 +80,9 @@ def main():
         pygame.display.flip()
 
         if need_to_wait:
-            time.sleep(0.8)
+            time.sleep(0.5)
             need_to_wait = False
+            continue
 
         if players_turn:
             message = font.render(computer_message + 'Your turn.', True, black)
