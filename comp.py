@@ -2,8 +2,10 @@ import copy
 
 import matplotlib.pyplot as plt
 
-import grid
+import math
 import random
+
+import grid
 import ship
 
 class Computer:
@@ -18,6 +20,8 @@ class Computer:
         self.shots_missed = set()
 
         self.sunk_squares = set()
+
+        self.heatmap = {}
         
         self.defeated = False
 
@@ -139,23 +143,25 @@ class Computer:
     
     def make_shot(self, sunk_ships):
         """Generate a shot to send to player."""
-        
-        square_tuples = sorted(self.accumulate_simulations(sunk_ships).items(),
-                             key=lambda x: x[1], reverse=True)
-        self.show_heatmap()
+
+        if self.heatmap == {}:
+            self.heatmap = self.accumulate_simulations(sunk_ships)
+        square_tuples = sorted(self.heatmap.items(), key=lambda x: x[1],
+                               reverse=True)
         for square_tuple in square_tuples:
             square, freq = square_tuple
             if square not in self.shots_sent:
                 self.shots_sent.add(square)
                 return square
 
-    def register_shot(self, shot, hit):
+    def register_shot(self, shot, hit, sunk_ships):
         """Register and record a hit or miss response from player."""
         
         if hit:
             self.shots_hit.add(shot)
         else:
             self.shots_missed.add(shot)
+        self.heatmap = self.accumulate_simulations(sunk_ships)
 
     def show(self, game):
         self.ships_sunk()
@@ -225,8 +231,52 @@ class Computer:
     def grid_rect(self, game):
         return game.Rect(460, 40, 400, 400)
 
-    def show_heatmap(self):#, square_frequency):
-        pass
-        #plt.hist2d([1, 2], [3, 4])
-        #plt.show()
+    def show_heatmap(self, game):
+        font = game.font.SysFont(game.font.get_default_font(), 22)
+        alphabet = 'ABCDEFGHIJ'
+        black = (0, 0, 0) 
         
+        screen = game.display.get_surface()
+
+        header = "Player's grid as the computer sees it"
+        width = font.size(header)[0]
+        render = font.render(header, True, black)
+        screen.blit(render, (220 - width // 2, 5))
+        
+        offset = 0
+
+        for letter in alphabet:
+            width = font.size(letter)[0]
+            render = font.render(letter, True, black)
+            screen.blit(render, (40 + offset - width // 2, 25))
+            offset += 40
+
+        offset = 0
+        numbers = map(str, range(1, 11))
+        for number in numbers:
+            height = font.size(number)[1]
+            render = font.render(number, True, black)
+            screen.blit(render, (2, 60 + offset - height//2))
+            offset += 40
+
+        
+        full_grid = [(col, row) for row in numbers for col in alphabet]
+        for square in full_grid:
+            col, row = square
+            col_num = alphabet.index(col)
+            left_side = 20 + 40 * col_num
+            row_num = int(row)
+            top_side = 40 * row_num
+
+            rect = game.Rect(left_side, top_side, 40, 40)
+            if square in self.heatmap:
+                color = (255*math.sqrt(self.heatmap[square])/10, 0, 0)
+            else:
+                color = black
+                
+            game.draw.rect(screen, color, rect)
+            game.draw.rect(screen, black, rect, 1)
+
+        big_rect = game.Rect(20, 40, 400, 400)
+        game.draw.rect(screen, black, big_rect, 2)
+

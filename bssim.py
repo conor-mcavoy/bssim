@@ -13,6 +13,7 @@ import ship
 # TODO later
 # interactive ship placement
 # add heatmap option
+# normalize wording: ships sunk or sunk ships
 
 def main():
     parser = argparse.ArgumentParser()
@@ -41,16 +42,21 @@ def main():
     clock = pygame.time.Clock()
     font = pygame.font.SysFont(pygame.font.get_default_font(), 22)
     message = font.render('Your turn.', True, black)
+    right_message = font.render('Press TAB to see how the computer views your grid.', True, black)
     
     players_turn = True
     need_to_wait = False
     computer_message = ''
+    heatmap_visible = False
 
     while True:
         clock.tick(60)
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 sys.exit()
+            elif event.type == pygame.KEYUP:
+                if event.key == pygame.K_TAB:
+                    heatmap_visible = not heatmap_visible
             elif players_turn and event.type == pygame.MOUSEBUTTONDOWN\
                  and pygame.mouse.get_pressed()[0]:
                 mouse_pos = pygame.mouse.get_pos()
@@ -62,16 +68,24 @@ def main():
                         response = computer.query(square)
                         computer_message = ''
                         if response:
-                            message_text = "Hit at {}{}! Computer's turn.".format(square[0], square[1])
+                            message_text = "Hit at {}{}! Computer's turn."
                         else:
-                            message_text = "Miss at {}{}! Computer's turn.".format(square[0], square[1])
-                        message = font.render(message_text, True, black)        
+                            message_text = "Miss at {}{}! Computer's turn."
+                        message = font.render(message_text.format(*square),
+                                              True, black)        
 
         screen.fill((255, 255, 255))
 
         screen.blit(message, (20, 455))
-        p.show(pygame)
+        screen.blit(right_message, (460, 455))
         computer.show(pygame)
+
+        if heatmap_visible:
+            right_message = font.render('Press TAB to see your grid normally.', True, black)
+            computer.show_heatmap(pygame)
+        else:
+            right_message = font.render('Press TAB to see how the computer views your grid.', True, black)
+            p.show(pygame)
         
         pygame.display.flip()
 
@@ -79,7 +93,7 @@ def main():
             time.sleep(0.8)
             need_to_wait = False
             continue
-
+        
         if players_turn:
             message = font.render(computer_message + 'Your turn.', True, black)
             mouse_pos = pygame.mouse.get_pos()
@@ -101,12 +115,12 @@ def main():
                 computer_message += 'hit! '
             else:
                 computer_message += 'miss! '    
-            computer.register_shot(computer_shot, player_response)
+            computer.register_shot(computer_shot, player_response, p.ships_sunk())
             players_turn = True
             need_to_wait = True
             
         while computer.defeated or p.defeated:
-            clock.tick(60)
+            clock.tick(10)
             pygame.mouse.set_cursor(*pygame.cursors.arrow)
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
