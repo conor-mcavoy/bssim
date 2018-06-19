@@ -31,7 +31,7 @@ class Computer:
             while True:
                 col, row = random.choice(full_grid)
                 direction = random.choice(['right', 'down'])
-                ship_str = ' '.join(ship_size, col, row, direction)
+                ship_str = ' '.join([ship_size, col, row, direction])
                 try:
                     s = ship.Ship(ship_str)
                 except IndexError:
