@@ -6,6 +6,7 @@ class Player:
         self.occupied = set()
         self.shots_taken = set()
         self.defeated = False
+        self.sunk_squares = set()
 
     def __str__(self):
         return str(self.grid)
@@ -15,7 +16,6 @@ class Player:
         self.occupied.update(self.grid.occupied_squares())
 
     def query(self, square):
-        self.ships_sunk()
         self.shots_taken.add(square)
         if self.occupied <= self.shots_taken:
             self.defeated = True
@@ -26,11 +26,14 @@ class Player:
     def ships_sunk(self):
         sunk = {}
         for s in self.grid.ships:
-            if s.squares <= self.shots_taken:
+            if s.sunk or s.squares <= self.shots_taken:
+                s.sunk = True
+                self.sunk_squares.update(s.squares)
                 sunk[s.size] = (s.square, s.direction)
         return sunk
     
     def show(self, game):
+        self.ships_sunk()
         font = game.font.SysFont(game.font.get_default_font(), 22)
         alphabet = 'ABCDEFGHIJ'
         black = (0, 0, 0)
@@ -38,6 +41,7 @@ class Player:
         dark_blue = (0, 0, 128)
         gray = (128, 128, 128)
         red = (255, 0, 0)
+        dark_red = (128, 0, 0)
         
         screen = game.display.get_surface()
 
@@ -74,7 +78,10 @@ class Player:
             rect = game.Rect(left_side, top_side, 40, 40)
             if square in self.occupied:
                 if square in self.shots_taken:
-                    color = red
+                    if square in self.sunk_squares:
+                        color = dark_red
+                    else:
+                        color = red
                 else:
                     color = gray
             else:

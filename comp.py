@@ -1,5 +1,7 @@
 import copy
 
+import matplotlib.pyplot as plt
+
 import grid
 import random
 import ship
@@ -14,8 +16,16 @@ class Computer:
         self.shots_sent = set()
         self.shots_hit = set()
         self.shots_missed = set()
+
+        self.sunk_squares = set()
         
         self.defeated = False
+
+    def ships_sunk(self):
+        for s in self.grid.ships:
+            if s.sunk or s.squares <= self.shots_taken:
+                s.sunk = True
+                self.sunk_squares.update(s.squares)
 
     def generate_ships(self):
         """Initialize ship positions randomly."""
@@ -132,6 +142,7 @@ class Computer:
         
         square_tuples = sorted(self.accumulate_simulations(sunk_ships).items(),
                              key=lambda x: x[1], reverse=True)
+        self.show_heatmap()
         for square_tuple in square_tuples:
             square, freq = square_tuple
             if square not in self.shots_sent:
@@ -147,11 +158,13 @@ class Computer:
             self.shots_missed.add(shot)
 
     def show(self, game):
+        self.ships_sunk()
         font = game.font.SysFont(game.font.get_default_font(), 22)
         alphabet = 'ABCDEFGHIJ'
         black = (0, 0, 0)
         blue = (0, 0, 255)
         red = (255, 0, 0)
+        dark_red = (128, 0, 0)
         white = (255, 255, 255)
         screen = game.display.get_surface()
 
@@ -187,7 +200,10 @@ class Computer:
             rect = game.Rect(left_side, top_side, 40, 40)
             if square in self.shots_taken:
                 if square in self.occupied:
-                    color = red
+                    if square in self.sunk_squares:
+                        color = dark_red
+                    else:
+                        color = red
                 else:
                     color = blue
             else:
@@ -208,3 +224,9 @@ class Computer:
 
     def grid_rect(self, game):
         return game.Rect(460, 40, 400, 400)
+
+    def show_heatmap(self):#, square_frequency):
+        pass
+        #plt.hist2d([1, 2], [3, 4])
+        #plt.show()
+        

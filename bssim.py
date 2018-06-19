@@ -10,10 +10,6 @@ import grid
 import player
 import ship
 
-# TODO soon
-# show and tell the player when they sink a ship
-# show and tell the player when one of their ships is sunk
-
 # TODO later
 # interactive ship placement
 # add heatmap option
@@ -80,7 +76,7 @@ def main():
         pygame.display.flip()
 
         if need_to_wait:
-            time.sleep(0.5)
+            time.sleep(0.8)
             need_to_wait = False
             continue
 

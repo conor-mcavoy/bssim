@@ -1,5 +1,6 @@
 class Ship:
     def __init__(self, ship_str):
+        self.sunk = False
         size, column, row, direction = ship_str.split()
         self.size = int(size)
         self.square = (column, row)
